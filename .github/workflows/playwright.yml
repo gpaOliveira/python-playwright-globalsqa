@@ -1,0 +1,67 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  run-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image for tests and run them
+        run: docker compose up --build
+    
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: reports
+          path: reports/
+          retention-days: 30  
+
+      - name: Stop and remove containers
+        run: docker compose down
+        if: ${{ always() }}
+
+      - name: Cache built Docker layers
+        uses: docker/build-push-action@v6
+        with:
+          push: false  
+          cache-from: type=gha
+          cache-to: type=gha,mode=max`
+
+  publish-report:
+    needs: run-tests
+    if: ${{ always() }} # Run even if run-tests fails
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Playwright Report
+        uses: actions/download-artifact@v4
+        with:
+          name: reports
+          path: reports/
+      - name: Rename the first HTML file in the reports directory to index.html
+        run: |
+          find reports -type f -name '*.html' -print -quit | xargs -I {} mv {} reports/index.html
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -35,7 +35,7 @@ line-length = 88
 target-version = "py312"
 
 [tool.pytest.ini_options]
-addopts = "--tb=long --html=reports/report.html --self-contained-html --screenshot=on --video=on --tracing=on --capture=tee-sys"
+addopts = "--tb=long --self-contained-html --screenshot=on --video=on --tracing=on --capture=tee-sys"
 testpaths = ["tests"]
 python_files = "test_*.py"
 log_cli = true
