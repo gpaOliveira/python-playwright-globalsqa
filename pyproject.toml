@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "python-playwright-globalsqa"
+version = "0.1.0"
+description = "Playwright tests and examples for GlobalsQA"
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/gpaoliveira/python-playwright-globalsqa"
+repository = "https://github.com/gpaoliveira/python-playwright-globalsqa"
+keywords = ["playwright", "testing", "automation", "globalsqa"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12.6,<3.13"
+playwright = "^1.58.0"
+pytest = "^9.0.2"
+pytest-playwright = "^0.7.2"
+pytest-html = "^4.2.0"
+ruff = "^0.11.0"
+black = "^24.3.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.pytest.ini_options]
+addopts = "--tb=long --html=reports/report.html --self-contained-html --screenshot=on --video=on --tracing=on --capture=tee-sys"
+testpaths = ["tests"]
+python_files = "test_*.py"
+log_cli = true
+log_cli_level = "INFO"
+log_format = "%(asctime)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+markers = ["e2e: end-to-end tests using Playwright"]
