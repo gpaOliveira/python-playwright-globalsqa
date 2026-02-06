@@ -37,6 +37,8 @@ poetry run pytest
 
 We strive for fast, repeatable, and readable test runs with built-in tooling:
 
-- **Lint & Format**: `ruff`, `black`, and `isort` are configured for the project to keep code consistent and fast to check. They are executed automatically when running `poetry run pytest`.
+- **Lint & Format**: `ruff`, `black`, and `isort` are configured for the project to keep code consistent and fast to check. They are executed automatically when running `poetry run pytest`. If they fail, [a script](./scripts/fix.sh) can be used to trigger automatic fixes
 - **Logging**: Pytest is configured to emit structured CLI logs during runs (timestamped, INFO level) so debugging test failures is quick.
-- **HTML Reports**: `pytest-html` produces a single self-contained report (see `reports/report.html`) including embedded screenshots and logging lines.
+- **HTML Reporting**: `pytest-html` produces a single self-contained report (see `reports/report.html`) including embedded screenshots and logging lines.
+- **CI ready**: We use Docker to ensure consistent and reproducible environments for our testing. Our [Dockerfile](./Dockerfile) and [docker-compose.yml](./docker-compose.yml) files are configured to build and run the tests and export the HTML report. Scripts to help bring it [up](./scripts/docker-run.sh) and [down](./scripts/docker-stop.sh) are also available. We also leverage GitHub Actions for continuous integration, showcasing the HTML report in the Pull Request.
+

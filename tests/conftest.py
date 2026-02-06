@@ -3,6 +3,8 @@ import shutil
 import subprocess
 import sys
 from base64 import b64encode
+from datetime import datetime
+from pathlib import Path
 
 import pytest
 from playwright.sync_api import sync_playwright
@@ -46,6 +48,18 @@ def pytest_configure(config):
     # Add some more metadata to the HTML report
     config._metadata = getattr(config, "_metadata", {})
     config._metadata.setdefault("Platform", sys.platform)
+
+    # set custom options only if none are provided from command line
+    if not config.option.htmlpath:
+        now = datetime.now()
+        # create report target dir
+        reports_dir = Path("reports")
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        # custom report file
+        report = reports_dir.joinpath(f"report_{now.strftime('%Y%m%d_%H%M%S')}.html")
+        # adjust plugin options
+        config.option.htmlpath = report
+        config.option.self_contained_html = True
 
 
 def _run_cmd(cmd):

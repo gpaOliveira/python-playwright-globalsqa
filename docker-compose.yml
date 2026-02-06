@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  tests:
+    build: .
+    volumes:
+      - ./reports:/app/reports
+
+volumes:
+  reports:
