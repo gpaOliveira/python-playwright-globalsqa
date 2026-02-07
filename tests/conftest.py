@@ -6,8 +6,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
+import pytest_html
+from pages.CreateNewCustomer import CreateNewCustomer
 from pages.LoginCustomer import LoginCustomer
-from pages.LoginManager import LoginManager
 from pages.Reporter import Reporter
 from playwright.sync_api import (
     Browser,
@@ -34,7 +35,9 @@ def browser(playwright_instance: Playwright):
 
 @pytest.fixture
 def context(browser: Browser, base_url: str):
-    context: BrowserContext = browser.new_context(base_url=base_url)
+    context: BrowserContext = browser.new_context(
+        base_url=base_url, record_video_dir="reports/videos/"
+    )
     yield context
     context.close()
 
@@ -66,8 +69,8 @@ def login_customer(page: Page, reporter: Reporter) -> LoginCustomer:
 
 
 @pytest.fixture()
-def login_manager(page: Page, reporter: Reporter) -> LoginManager:
-    return LoginManager(page, reporter)
+def create_customer(page: Page, reporter: Reporter) -> CreateNewCustomer:
+    return CreateNewCustomer(page, reporter)
 
 
 def pytest_configure(config):
@@ -141,6 +144,11 @@ def pytest_sessionstart(session):
         pytest.exit("\n\n".join(msg_parts), returncode=1)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def faker_seed():
+    return datetime.now().timestamp()
+
+
 def pytest_html_results_table_header(cells):
     cells.insert(2, "<th>Description</th>")
     cells.insert(1, '<th class="sortable time" data-column-type="time">Time</th>')
@@ -162,9 +170,21 @@ def pytest_runtest_makereport(item, call):
     extra = getattr(report, "extras", [])
     if report.when == "call":
         if "page" in item.funcargs:
+            page: Page = item.funcargs["page"]
             Reporter(
-                page=item.funcargs["page"],
+                page=page,
                 logger=item.funcargs.get("logger"),
                 extras=extra,
             ).snapshot()
+            extra.append(
+                pytest_html.extras.url(
+                    content=str(
+                        Path(page.video.path()).relative_to(
+                            Path.cwd().joinpath("reports")
+                        )
+                    ),
+                    name="Video",
+                )
+            )
+
         report.extras = extra
