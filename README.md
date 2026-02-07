@@ -49,3 +49,15 @@ We strive for fast, repeatable, and readable test runs with built-in tooling:
 - **HTML Reporting**: `pytest-html` produces a single self-contained report including embedded screenshots and logging lines. Check your `reports/` folder after running tests, there should be a HTML file there with the timestamp of your execution. Such report already brings snapshots (taken by our page objects) and a video of your test.
 - **CI ready**: We also use Docker to ensure consistent and reproducible browser environments for our testing - so even if you don't have Python in your machine you can run the tests! Our [Dockerfile](./Dockerfile) and [docker-compose.yml](./docker-compose.yml) files are configured to build and run the tests and export the HTML report. Scripts to help bring it [up](./scripts/docker-run.sh) and [down](./scripts/docker-stop.sh) are also available. We also leverage GitHub Actions for continuous integration, showcasing the HTML report in the Pull Request.
 
+## Page Objects 🛠️
+
+Explain about LoginCustomer and LoginManager leading to others
+
+## Test cases 🧪
+
+
+Unit tests
+- Add customer mandatory fields
+- Currency options (Dollar, Pound, Rupee)
+- Search/filtering behaviour when listing customer (first name works, last name works, post code works, first name + last name does not, check customers with same name but different last name to see if two rows appear)
+- All customer's data is shown (bug: Account Number is not shown for newly added customers)

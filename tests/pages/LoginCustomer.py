@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Locator, Page, expect
 
 from .Login import Login
 from .Reporter import Reporter
@@ -11,6 +11,8 @@ class LoginCustomer(Login):
 
     def __init__(self, page: Page, reporter: Reporter):
         super().__init__(page, reporter)
+        self.customer_select: Locator = self.page.locator("#userSelect")
+        self.login_button: Locator = self.page.get_by_role("button", name="Login")
 
     def _navigate_login_customer(self):
         """
@@ -54,7 +56,7 @@ class LoginCustomer(Login):
         Args:
             check_label (str): The label of the customer who logged in.
         """
-        self.customer_login_button.click()
+        self.login_button.click()
         self.reporter.log(f"Check if {check_label} is visible after login")
         expect(self.page.get_by_text(f"Welcome {check_label} !!")).to_be_visible()
 
@@ -70,13 +72,25 @@ class LoginCustomer(Login):
         expect(self.customer_select).to_be_visible()
         return self.customer_select.all_inner_texts()[0].split("\n")[1:]
 
+    def get_available_customers_to_login(self) -> List[str]:
+        """
+        Retrieves the list of available customers to login - useful to check when we add/delete customers.
+
+        **WARNING:** Assumes we already clicked the customer login button and are on the screen with the select.
+
+        Returns:
+            List[str]: A list of customer labels.
+        """
+        self._navigate_login_customer()
+        return self._get_available_customers_to_login()
+
     def login(self, label: Optional[str] = None, index: Optional[int] = None):
         """
         Logs in as a customer using the provided label or index.
 
         Navigates to the login page, selects the customer, and clicks the login button.
 
-        **WARNING:** Assumes .navigate() was called before it
+        **WARNING:** Assumes self.navigate() was called before it
 
         Args:
             label (Optional[str], optional): The label of the customer to login. Defaults to None.
@@ -94,3 +108,16 @@ class LoginCustomer(Login):
             "Expect customer sees a message to open an account"
         )
         expect(self.page.get_by_text("Please open an account with us")).to_be_visible()
+
+    def expect_account_details(
+        self, balance: int, currency: Literal["Dollar", "Pound", "Rupee"]
+    ):
+        """
+        Expects the message indicating that the customer has no account to be visible.
+        """
+        self.reporter.log_with_snapshot(
+            f"Expect customer sees his account balance and currency as {balance} and {currency}"
+        )
+        expect(
+            self.page.get_by_text(f"Balance : {balance} , Currency : {currency}")
+        ).to_be_visible()

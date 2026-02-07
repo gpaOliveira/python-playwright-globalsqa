@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 import pytest_html
-from pages.CreateNewCustomer import CreateNewCustomer
 from pages.LoginCustomer import LoginCustomer
+from pages.LoginManager import LoginManager
 from pages.Reporter import Reporter
 from playwright.sync_api import (
     Browser,
@@ -69,8 +69,8 @@ def login_customer(page: Page, reporter: Reporter) -> LoginCustomer:
 
 
 @pytest.fixture()
-def create_customer(page: Page, reporter: Reporter) -> CreateNewCustomer:
-    return CreateNewCustomer(page, reporter)
+def login_manager(page: Page, reporter: Reporter) -> LoginManager:
+    return LoginManager(page, reporter)
 
 
 def pytest_configure(config):

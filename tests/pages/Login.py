@@ -13,10 +13,6 @@ class Login:
         self.customer_button: Locator = self.page.get_by_role(
             "button", name="Customer Login"
         )
-        self.customer_select: Locator = self.page.locator("#userSelect")
-        self.customer_login_button: Locator = self.page.get_by_role(
-            "button", name="Login"
-        )
 
     def navigate(self):
         self.reporter.log("Navigating to BASE_URL/login")
