@@ -18,8 +18,8 @@ def test_manager_create_customer(
 
     # Check we can login with the newly created customer, even when they have no account
     login_customer.navigate()
-    login_customer.login(label=f"{first_name} {last_name}")
-    login_customer.expect_no_account_message()
+    details_page = login_customer.login(label=f"{first_name} {last_name}")
+    details_page.expect_no_account_message()
 
 
 def test_manager_create_customer_with_account(
@@ -44,8 +44,12 @@ def test_manager_create_customer_with_account(
 
     # Check we can login with the newly created customer and see their account summary
     login_customer.navigate()
-    login_customer.login(label=f"{first_name} {last_name}")
-    login_customer.expect_account_details(balance=0, currency=currency)
+    details_page = login_customer.login(label=f"{first_name} {last_name}")
+    details_page.expect_account_details(balance=0, currency=currency)
+
+    # Check customer cannot withdraw money from their account since they have no money in it
+    details_page.withdraw(amount=10)
+    details_page.expect_withdrawal_error_message()
 
 
 def test_manager_create_customer_then_delete(
@@ -71,6 +75,7 @@ def test_manager_create_customer_then_delete(
     list_customers_page.delete_row_index(0)
 
     # Check we do not see our customer listed to login
-    login_customer.navigate()
+    login_manager.home_button.click()
+    login_customer.navigate_login_customer()
     logins = login_customer.get_available_customers_to_login()
     assert f"{first_name} {last_name}" not in logins

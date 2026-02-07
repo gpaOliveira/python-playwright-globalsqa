@@ -55,9 +55,14 @@ Explain about LoginCustomer and LoginManager leading to others
 
 ## Test cases 🧪
 
+E2E test cases left behind:
+- Home button is _always_ leading the user to the main login screen, regardless where the user is
 
-Unit tests
+Unit tests for single page behaviours:
 - Add customer mandatory fields
 - Currency options (Dollar, Pound, Rupee)
 - Search/filtering behaviour when listing customer (first name works, last name works, post code works, first name + last name does not, check customers with same name but different last name to see if two rows appear)
 - All customer's data is shown (bug: Account Number is not shown for newly added customers)
+- All customer's data can be sorted (by first name, by last name, by post code, not by account number)
+- Filter customer's transactions by date-time
+- Sort customer's transactions by date-time (not by amount nor transaction type, apparently)

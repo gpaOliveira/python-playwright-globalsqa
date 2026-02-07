@@ -7,6 +7,7 @@ class Login:
     def __init__(self, page: Page, reporter: Reporter):
         self.page = page
         self.reporter = reporter
+        self.home_button: Locator = self.page.get_by_role("button", name="Home")
         self.manager_button: Locator = self.page.get_by_role(
             "button", name="Bank Manager Login"
         )
