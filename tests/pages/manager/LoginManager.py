@@ -1,10 +1,10 @@
+from pages.base.Login import Login
+from pages.base.Reporter import Reporter
 from playwright.sync_api import Page
 
 from .AddCustomer import AddCustomer
-from .ListCostumers import ListCustomers
-from .Login import Login
+from .ListCustomers import ListCustomers
 from .OpenAccount import OpenAccount
-from .Reporter import Reporter
 
 
 class LoginManager(Login):

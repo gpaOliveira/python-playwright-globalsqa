@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 import pytest_html
-from pages.LoginCustomer import LoginCustomer
-from pages.LoginManager import LoginManager
-from pages.Reporter import Reporter
+from pages.base.Reporter import Reporter
+from pages.customer.LoginCustomer import LoginCustomer
+from pages.manager.LoginManager import LoginManager
 from playwright.sync_api import (
     Browser,
     BrowserContext,

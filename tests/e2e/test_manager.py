@@ -1,6 +1,6 @@
 from faker import Faker
-from pages.LoginCustomer import LoginCustomer
-from pages.LoginManager import LoginManager
+from pages.customer.LoginCustomer import LoginCustomer
+from pages.manager.LoginManager import LoginManager
 
 
 def test_manager_create_customer(

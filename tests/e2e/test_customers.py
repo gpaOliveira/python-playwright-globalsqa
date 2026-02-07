@@ -1,4 +1,4 @@
-from pages.LoginCustomer import LoginCustomer
+from pages.customer.LoginCustomer import LoginCustomer
 
 
 def test_login_as_customer(login_customer: LoginCustomer):

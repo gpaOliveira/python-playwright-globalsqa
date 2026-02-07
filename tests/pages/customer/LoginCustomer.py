@@ -1,10 +1,10 @@
 from typing import List, Optional
 
+from pages.base.Login import Login
+from pages.base.Reporter import Reporter
 from playwright.sync_api import Locator, Page, expect
 
 from .DetailsCustomer import DetailsCustomers
-from .Login import Login
-from .Reporter import Reporter
 
 
 class LoginCustomer(Login):

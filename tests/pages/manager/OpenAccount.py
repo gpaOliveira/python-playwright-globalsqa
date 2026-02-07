@@ -1,8 +1,7 @@
 from typing import Literal
 
+from pages.base.Reporter import Reporter
 from playwright.sync_api import Locator, Page, expect
-
-from .Reporter import Reporter
 
 
 class OpenAccount:
