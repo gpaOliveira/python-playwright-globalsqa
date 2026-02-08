@@ -1,5 +1,4 @@
-from typing import Literal
-
+from pages.base.Currency import Currency
 from pages.base.Reporter import Reporter
 from playwright.sync_api import Locator, Page, expect
 
@@ -35,9 +34,7 @@ class OpenAccount:
         expect(self.currency_select).to_have_value("")
         expect(self.process_button).to_be_visible()
 
-    def open_account(
-        self, customer_full_name: str, currency: Literal["Dollar", "Pound", "Rupee"]
-    ):
+    def open_account(self, customer_full_name: str, currency: Currency):
         """
         Open a new account for a customer with full name and currency as specified as inputs.
 
@@ -47,13 +44,13 @@ class OpenAccount:
 
         Args:
             customer_full_name (str): The customer full name (first name and last name).
-            currency (str): The currency to use, either "Dollar", "Pound" or "Rupee".
+            currency (Currency): The currency to use
         """
         self.reporter.log_with_snapshot(
             "Adding a new customer with the following details:  "
             f"Full Name: {customer_full_name}, Currency: {currency}"
         )
         self.customer_select.select_option(label=customer_full_name)
-        self.currency_select.select_option(label=currency)
+        self.currency_select.select_option(label=currency.value)
         self.process_button.click()
         self._expect_new_account_default_values()

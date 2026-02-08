@@ -1,4 +1,6 @@
 from faker import Faker
+from pages.base.Currency import Currency
+from pages.customer.DetailsCustomer import CustomerMessages
 from pages.customer.LoginCustomer import LoginCustomer
 from pages.manager.LoginManager import LoginManager
 
@@ -26,7 +28,7 @@ def test_deposit_withdraw_customer(
     """
     first_name = faker.first_name()
     last_name = faker.last_name()
-    currency = "Pound"
+    currency = Currency.POUND
 
     # Create our customer
     add_customer_page = login_manager.navigate_to_add_customer()
@@ -48,7 +50,7 @@ def test_deposit_withdraw_customer(
     # Check we can deposit money and see the updated account summary
     details_page.deposit(amount=100)
     details_page.expect_account_details(balance=100, currency=currency)
-    details_page.expect_deposit_successful_message()
+    details_page.expect_message(CustomerMessages.DEPOSIT_SUCCESSFUL)
     details_page.go_to_transactions(expected_count=2)
     details_page.expect_transaction_row_contains(balance=100, transaction_type="Credit")
     details_page.back_to_account_summary()
@@ -56,7 +58,7 @@ def test_deposit_withdraw_customer(
     # Check we can withdraw money and see the updated account summary
     details_page.withdraw(amount=50)
     details_page.expect_account_details(balance=50, currency=currency)
-    details_page.expect_withdrawl_successful_message()
+    details_page.expect_message(CustomerMessages.WITHDRAWAL_SUCCESSFUL)
     details_page.go_to_transactions(expected_count=3)
     details_page.expect_transaction_row_contains(balance=50, transaction_type="Debit")
     details_page.back_to_account_summary()

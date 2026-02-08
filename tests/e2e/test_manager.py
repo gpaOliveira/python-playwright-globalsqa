@@ -1,4 +1,6 @@
 from faker import Faker
+from pages.base.Currency import Currency
+from pages.customer.DetailsCustomer import CustomerMessages
 from pages.customer.LoginCustomer import LoginCustomer
 from pages.manager.LoginManager import LoginManager
 
@@ -19,7 +21,7 @@ def test_manager_create_customer(
     # Check we can login with the newly created customer, even when they have no account
     login_customer.navigate()
     details_page = login_customer.login(label=f"{first_name} {last_name}")
-    details_page.expect_no_account_message()
+    details_page.expect_message(CustomerMessages.NO_ACCOUNT)
 
 
 def test_manager_create_customer_with_account(
@@ -28,7 +30,7 @@ def test_manager_create_customer_with_account(
     """Manager can create a customer with an account (with Dollar) but not withdraw money since they have no balance"""
     first_name = faker.first_name()
     last_name = faker.last_name()
-    currency = "Dollar"
+    currency = Currency.DOLLAR
 
     # Create our customer
     add_customer_page = login_manager.navigate_to_add_customer()
@@ -49,7 +51,7 @@ def test_manager_create_customer_with_account(
 
     # Check customer cannot withdraw money from their account since they have no money in it
     details_page.withdraw(amount=10)
-    details_page.expect_withdrawal_error_message()
+    details_page.expect_message(CustomerMessages.WITHDRAWAL_ERROR)
 
 
 def test_manager_create_customer_then_delete(

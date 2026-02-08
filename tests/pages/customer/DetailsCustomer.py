@@ -1,7 +1,20 @@
+from enum import Enum
 from typing import Literal
 
+from pages.base.Currency import Currency
 from pages.base.Reporter import Reporter
 from playwright.sync_api import Locator, Page, expect
+
+
+class CustomerMessages(Enum):
+    """Enum to hold the different messages that can be shown when we are in the customer's details area."""
+
+    NO_ACCOUNT = "Please open an account with us"
+    DEPOSIT_SUCCESSFUL = "Deposit Successful"
+    WITHDRAWAL_SUCCESSFUL = "Transaction successful"
+    WITHDRAWAL_ERROR = (
+        "Transaction Failed. You can not withdraw amount more than the balance."
+    )
 
 
 class DetailsCustomers:
@@ -19,10 +32,6 @@ class DetailsCustomers:
             "button", name="Transactions"
         )
         self.back_button: Locator = self.page.get_by_role("button", name="Back")
-        self.deposit_button: Locator = self.page.get_by_role("button", name="Deposit")
-        self.withdrawl_button: Locator = self.page.get_by_role(
-            "button", name="Withdrawl"
-        )
         self.logout_button: Locator = self.page.get_by_role("button", name="Logout")
         self.amount_input: Locator = self.page.get_by_placeholder("amount")
         self.submit_button: Locator = self.page.get_by_role("form").get_by_role(
@@ -36,18 +45,7 @@ class DetailsCustomers:
         self.reporter.log_with_snapshot("Logging out the customer")
         self.logout_button.click()
 
-    def expect_no_account_message(self):
-        """
-        Expects the message indicating that the customer has no account to be visible.
-        """
-        self.reporter.log_with_snapshot(
-            "Expect customer sees a message to open an account"
-        )
-        expect(self.page.get_by_text("Please open an account with us")).to_be_visible()
-
-    def expect_account_details(
-        self, balance: int, currency: Literal["Dollar", "Pound", "Rupee"]
-    ):
+    def expect_account_details(self, balance: int, currency: Currency):
         """
         Expects the message indicating that the customer has no account to be visible.
         """
@@ -55,8 +53,27 @@ class DetailsCustomers:
             f"Expect customer sees his account balance and currency as {balance} and {currency}"
         )
         expect(
-            self.page.get_by_text(f"Balance : {balance} , Currency : {currency}")
+            self.page.get_by_text(f"Balance : {balance} , Currency : {currency.value}")
         ).to_be_visible()
+
+    def _perform_transaction(
+        self, amount: int, transaction_type: Literal["Deposit", "Withdrawl"]
+    ):
+        """
+        Performs a transaction (deposit or withdraw) by clicking the corresponding button, filling the amount and submitting the form.
+
+        Args:
+            amount (int): The amount to deposit or withdraw.
+            transaction_type (Literal["Deposit", "Withdrawl"]): The button to click to decide on which transaction to perform
+            (yes, there's a typo in the application, a minor BUG to report)
+        """
+        self.reporter.log_with_snapshot(f"{transaction_type} {amount} on the account")
+        self.transaction_type_button: Locator = self.page.get_by_role(
+            "button", name=transaction_type
+        )
+        self.transaction_type_button.click()
+        self.amount_input.fill(str(amount))
+        self.submit_button.click()
 
     def withdraw(self, amount: int):
         """
@@ -65,10 +82,7 @@ class DetailsCustomers:
         Args:
             amount (int): The amount to withdraw.
         """
-        self.reporter.log_with_snapshot(f"Withdraw {amount} from the account")
-        self.withdrawl_button.click()
-        self.amount_input.fill(str(amount))
-        self.submit_button.click()
+        self._perform_transaction(amount=amount, transaction_type="Withdrawl")
 
     def deposit(self, amount: int):
         """
@@ -77,10 +91,7 @@ class DetailsCustomers:
         Args:
             amount (int): The amount to deposit.
         """
-        self.reporter.log_with_snapshot(f"Deposit {amount} on the account")
-        self.deposit_button.click()
-        self.amount_input.fill(str(amount))
-        self.submit_button.click()
+        self._perform_transaction(amount=amount, transaction_type="Deposit")
 
     def go_to_transactions(self, expected_count: int = 1, max_count=5):
         """
@@ -141,33 +152,9 @@ class DetailsCustomers:
         self.reporter.log_with_snapshot("Going back to the account summary page")
         self.back_button.click()
 
-    def expect_withdrawal_error_message(self):
+    def expect_message(self, message: CustomerMessages):
         """
-        Expects the error message indicating that the withdrawal cannot be processed to be visible.
+        Expects a message indicating some operation happened (like a successful deposit or an error when trying to withdraw money) to be visible.
         """
-        self.reporter.log_with_snapshot(
-            "Expect a message indicating that the withdrawal cannot be processed"
-        )
-        expect(
-            self.page.get_by_text(
-                "Transaction Failed. You can not withdraw amount more than the balance."
-            )
-        ).to_be_visible()
-
-    def expect_deposit_successful_message(self):
-        """
-        Expects the message indicating that the deposit was possible.
-        """
-        self.reporter.log_with_snapshot(
-            "Expect a message indicating that the deposit was possible"
-        )
-        expect(self.page.get_by_text("Deposit Successful")).to_be_visible()
-
-    def expect_withdrawl_successful_message(self):
-        """
-        Expects the message indicating that the withdrawl was possible.
-        """
-        self.reporter.log_with_snapshot(
-            "Expect a message indicating that the withdrawl was possible"
-        )
-        expect(self.page.get_by_text("Transaction successful")).to_be_visible()
+        self.reporter.log_with_snapshot(f"Expect a message indicating: {message.value}")
+        expect(self.page.get_by_text(message.value)).to_be_visible()

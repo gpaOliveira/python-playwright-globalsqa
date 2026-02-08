@@ -14,6 +14,7 @@ curl -fsSL https://pyenv.run | bash
 # or, with Homebrew  (macOS):
 # brew install poetry
 # brew install pyenv
+# Don't forget to walk through these instructions to setup pyenv: https://github.com/pyenv/pyenv?tab=readme-ov-file#b-set-up-your-shell-environment-for-pyenv
 
 # 2. Verify installation and make sure we are using Python 3.12.6:
 poetry --version
@@ -65,6 +66,7 @@ The full list of available page objects is summarised below per folder (all part
 - On [base folder](./tests/pages/base/) one finds common helpers, such as:
     - [Login](./tests/pages/base/Login.py): the base class for both LoginCustomer and LoginManager, wrapping up the logic to access the BASE_URL.
     - [Reporter](./tests/pages/base/Reporter.py): used by other page objects to add information (such as log lines or images) to the final HTML report.
+    - [Currency](./tests/pages/base/Currency): used by other page objects to when they need to refer to the currencies we use (either Dollar, Rupee, or Pound)
 
 - On [customer folder](./tests/pages/customer/) one finds page objects related to flows for customers, as follows:
     - [LoginCustomer](./tests/pages/customer/LoginCustomer.py): the main class for tests to login as a customer, with calls wrapping up the navigation to DetailsCustomer
@@ -82,7 +84,7 @@ With Python and Playwright, end to end (e2e) tests were created and placed under
 
 1. **test_login_as_customer**: ensures that an existing customer can log in and logout, mainly to make sure we have our common data in our test environment
 
-2. **test_deposit_withdraw_customer**: TBD, ensures that a customer can deposit, then withdraw, and see all the transactions in their account
+2. **test_deposit_withdraw_customer**: ensures that a customer can deposit, then withdraw, and see all the transactions in their account
 
 3. **test_manager_create_customer**: a manager can create a customer, without an account, and that customer can login
 
@@ -112,10 +114,10 @@ Similarly, all those tests assume some **API tests** were made to tests similar 
 Ideas to expand the current work include:
 
 - **Review ruff/black rules**: the default served us well so far, but we can streghten it more (e.g. force docstrings)
-- **Retry tests (x3)**: since the application is in another place, it can happen that the navigation to it fails, so retrying tests automatically may be enough to increase our confidence in tests
-- **Mermaid Diagram for Pages**: the pages folder explanation can probably be extracted to an entity relationship diagram, with comments
+- **Retry tests (x3)**: since the application is in another place, it can happen that the navigation to it fails, so retrying the main `.goto` automatically (like we did going back and forth the transactions page) may be enough to avoid that.
+- **Mermaid Diagram for Pages**: the explanation on page objects under the folder of the same name can probably be extracted to an entity relationship diagram, maybe even with comments
 - **Expand e2e test cases**: some missing tests were deliberately left behind for the sake of time, as follows:
     - Home button _always_ leading the user to the main login screen, regardless where the user is
     - Add multiple accounts to a customer, so they can manage their balance individually (and check balances are different)
     - Reset transactions on an account, cleaning up all the data and setting the balance to 0
-- **WebVitals**: Try [WebVitals](https://web.dev/articles/vitals) integration with Playwright in Python.
+- **WebVitals**: Try [WebVitals](https://web.dev/articles/vitals) integration with Playwright in Python, so that we can add to the tests the metrics acquired through it whenever we call any `.navigate` method.
