@@ -25,7 +25,7 @@ def test_manager_create_customer(
 def test_manager_create_customer_with_account(
     login_manager: LoginManager, faker: Faker, login_customer: LoginCustomer
 ):
-    """Manager can create a customer with an account (with Dollar)"""
+    """Manager can create a customer with an account (with Dollar) but not withdraw money since they have no balance"""
     first_name = faker.first_name()
     last_name = faker.last_name()
     currency = "Dollar"
