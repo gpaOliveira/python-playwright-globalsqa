@@ -14,6 +14,7 @@ curl -fsSL https://pyenv.run | bash
 # or, with Homebrew  (macOS):
 # brew install poetry
 # brew install pyenv
+# Don't forget to walk through these instructions to setup pyenv: https://github.com/pyenv/pyenv?tab=readme-ov-file#b-set-up-your-shell-environment-for-pyenv
 
 # 2. Verify installation and make sure we are using Python 3.12.6:
 poetry --version
@@ -60,65 +61,48 @@ Therefore, tests interact initially with either:
 
 From each of those pages, with special navigation method, the other page objects are acquired. For example, when calling `LoginCustomer.login(...)`, the page object `DetailsCustomers` is returned so that the test can interaxt with it to (among other things) withdraw money from the account.
 
-The full list of available page objects is summarised below:
+The full list of available page objects is summarised below per folder (all part of [pages folder](./tests/pages/)):
 
-```
-# pages folder (under tests folder)
-|
-## base folder
-    |
-    |-- Login: the base class for both LoginCustomer and LoginManager, wrapping up the logic to access the BASE_URL.
-    | 
-    |-- Reporter: used by other page objects to add information (such as log lines or images) to the final HTML report.
+- On [base folder](./tests/pages/base/) one finds common helpers, such as:
+    - [Login](./tests/pages/base/Login.py): the base class for both LoginCustomer and LoginManager, wrapping up the logic to access the BASE_URL.
+    - [Reporter](./tests/pages/base/Reporter.py): used by other page objects to add information (such as log lines or images) to the final HTML report.
+    - [Currency](./tests/pages/base/Currency): used by other page objects to when they need to refer to the currencies we use (either Dollar, Rupee, or Pound)
 
-|    
-## customer folder
-    |
-    |-- LoginCustomer: the main class for tests to login as a customer, with calls wrapping up the navigation to DetailsCustomer
-    |
-    |-- DetailsCustomer: allow tests (after login as a customer was done) to deposit or withdraw money and see the transactions on an account
+- On [customer folder](./tests/pages/customer/) one finds page objects related to flows for customers, as follows:
+    - [LoginCustomer](./tests/pages/customer/LoginCustomer.py): the main class for tests to login as a customer, with calls wrapping up the navigation to DetailsCustomer
+    - [DetailsCustomer](./tests/pages/customer/DetailsCustomer.py): allow tests (after login as a customer was done) to deposit or withdraw money and see the transactions on an account
 
-|    
-## manager folder
-    |
-    |-- LoginManager: the main class for tests to login as a manager, with calls wrapping up the navigation to the others
-    |
-    |-- AddCustomer: allow tests to add a customer (after login as a manager was done)
-    |
-    |-- ListCustomers: allow tests to list and delete customers (after login as a manager was done)
-    |
-    |-- OpenAccount: allow tests to open an account for a customer (after login as a manager was done)
-```
+- On [manager folder](./tests/pages/manager/) one finds page objects related to flows for managers, as follows:
+    - [LoginManager](./tests/pages/manager/LoginManager.py): the main class for tests to login as a manager, with calls wrapping up the navigation to the others
+    - [AddCustomer](./tests/pages/manager/AddCustomer.py): allow tests to add a customer (after login as a manager was done)
+    - [ListCustomers](./tests/pages/manager/ListCustomers.py): allow tests to list and delete customers (after login as a manager was done)
+    - [OpenAccount](./tests/pages/manager/OpenAccount.py): allow tests to open an account for a customer (after login as a manager was done)
 
 ## Test cases 🧪
 
 With Python and Playwright, end to end (e2e) tests were created and placed under the [tests folder](./tests/e2e/) to care for specific integation risks, as follows:
 
-* **test_login_as_customer**: ensures that an existing customer can log in (mainly to make sure we have our common data in our test environment)
+1. **test_login_as_customer**: ensures that an existing customer can log in and logout, mainly to make sure we have our common data in our test environment
 
-* **test_logout_as_customer**: ensures that a customer can logout and see the list of customers again
+2. **test_deposit_withdraw_customer**: ensures that a customer can deposit, then withdraw, and see all the transactions in their account
 
-* **test_deposit_customer**: TBD, ensures that a customer can deposit and see the transactions
+3. **test_manager_create_customer**: a manager can create a customer, without an account, and that customer can login
 
-* **test_withdraw_customer**: TBD, ensures that a customer can deposit, then withdraw, and see all the transactions in their account
+4. **test_manager_create_customer_with_account**: a manager can create a customer with an account (with any currency), and that customer can login. Also, they cannot withdraw money from their account (since they have no money in it).
 
-* **test_manager_create_customer**: a manager can create a customer, without an account, and that customer can login
+5. **test_manager_create_customer_then_delete**: a manager can create a customer and then delete it. As part of that process, they can filter the customers.
 
-* **test_manager_create_customer_with_account**: a manager can create a customer with an account (with any currency), and that customer can login. Also, they cannot withdraw money from their account (since they have no money in it).
-
-* **test_manager_create_customer_then_delete**: a manager can create a customer and then delete it. As part of that process, they can filter the customers.
-
-Given those tests are end-to-end, they're not meant to be exhaustive. They assume some checks (the ones tied to single page behaviours) were already created as unit tests, as follow:
-- Add customer mandatory fields
+Given those tests are end-to-end, they're not meant to be exhaustive. They assume some checks (the ones tied to single page behaviours) were already created as **frontend unit tests**, as follow:
+- Add customer mandatory fields and validations
 - Currency options (Dollar, Pound, Rupee)
 - Search/filtering behaviour when listing customer (first name works, last name works, post code works, first name + last name does not, check customers with same name but different last name to see if two rows appear)
 - All customer's data is shown (possible bug: Account Number is not shown for newly added customers)
 - All customer's data can be sorted (by first name, by last name, by post code, not by account number)
-- Filter customer's transactions by date-time
+- Filter customer's transactions by date-time (possible bug: I'm _almost_ sure this doesn't stops working when we clear both start/end dates and try to set them again)
 - Sort customer's transactions by date-time (not by amount nor transaction type, apparently)
 
-Similarly, all those tests assume some API tests were made to tests similar behaviours only using the involved microservices, as follows:
-- Add customer mandatory fields
+Similarly, all those tests assume some **API tests** were made to tests similar behaviours only using the involved microservices, as follows:
+- Add customer mandatory fields and validations
 - Creation of manager account (and login as one)
 - Creation of customers can't be made if not using a manager token
 - Currency options (Dollar, Pound, Rupee) are the same in all schemas
@@ -129,9 +113,11 @@ Similarly, all those tests assume some API tests were made to tests similar beha
 
 Ideas to expand the current work include:
 
-- **Retry tests (x3)**: since the application is in another place, it can happen that the navigation to it fails, so retrying tests automatically may be enough to increase our confidence in tests
-- **Mermaid Diagram for Pages**: the pages folder explanation can probably be extracted to an entity relationship diagram, with comments
+- **Review ruff/black rules**: the default served us well so far, but we can streghten it more (e.g. force docstrings)
+- **Retry tests (x3)**: since the application is in another place, it can happen that the navigation to it fails, so retrying the main `.goto` automatically (like we did going back and forth the transactions page) may be enough to avoid that.
+- **Mermaid Diagram for Pages**: the explanation on page objects under the folder of the same name can probably be extracted to an entity relationship diagram, maybe even with comments
 - **Expand e2e test cases**: some missing tests were deliberately left behind for the sake of time, as follows:
     - Home button _always_ leading the user to the main login screen, regardless where the user is
     - Add multiple accounts to a customer, so they can manage their balance individually (and check balances are different)
-- **WebVitals**: Try [WebVitals](https://web.dev/articles/vitals) integration with Playwright in Python.
+    - Reset transactions on an account, cleaning up all the data and setting the balance to 0
+- **WebVitals**: Try [WebVitals](https://web.dev/articles/vitals) integration with Playwright in Python, so that we can add to the tests the metrics acquired through it whenever we call any `.navigate` method.
